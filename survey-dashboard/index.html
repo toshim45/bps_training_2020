@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html><head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.min.css"></link>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.3/Chart.bundle.min.js"></script>
+  <title>Survey Dashboard</title>
+</head><body lang="en">
+<h1>Survey Dashboard</h1>
+<div id="app" class="container">
+  <canvas id="chart-survey-modus" style="height: 180px; width: 657px;" height="360" width="1314"></canvas>
+</div>
+<script>
+const color = Chart.helpers.color;
+let surveyModusData = {
+  labels: [],
+  datasets: [],
+}
+window.onload = function() {
+  let surveyModusCtx = document.getElementById("chart-survey-modus").getContext("2d");
+  window.surveyModusBar = new Chart(surveyModusCtx, {
+    type: 'bar',
+    data: surveyModusData,
+    options: {
+      responsive: true,
+      scales: {
+        xAxes: [{
+          display: true,
+          scaleLabel: {
+            display: true,
+          }
+        }],
+        yAxes: [{
+          display: true,
+          ticks: {
+            beginAtZero: true,
+          }
+        }]
+      },
+    }
+  });
+}
+
+var ws = new WebSocket('ws://localhost:15674/ws')
+var client = Stomp.over(ws);
+client.debug = function() {
+  if (window.console && console.log && console.log.apply) {
+    console.log.apply(console, arguments);
+  }
+};
+
+var on_connect = function(x) {
+  id = client.subscribe("/queue/surveys-modus", function(d) {
+    let payload = JSON.parse(d.body)
+    window.surveyModusBar.clear()
+    let newSurveyModusDataset = {
+        label: 'Survey Modus',
+        backgroundColor: color('#dd3333').alpha(0.5).rgbString(),
+        borderColor: '#dd3333',
+        borderWidth: 1,
+        data: []
+      }
+    
+      surveyModusData.labels.length = 0
+      surveyModusData.datasets.length = 0
+
+      payload.forEach((item, idx) => {
+        surveyModusData.labels.push(item.barang+' '+item.kualitas)
+        newSurveyModusDataset.data.push(item.jumlah)
+      })
+
+      surveyModusData.datasets.push(newSurveyModusDataset)
+      window.surveyModusBar.update()
+  }, {ack: 'auto'});
+};
+var on_error =  function() {
+  console.log('error');
+};
+client.connect('guest', 'guest', on_connect, on_error, '/');
+</script>
+</body></html>
