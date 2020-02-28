@@ -1,18 +1,40 @@
 package com.bps.employee.model;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Date;
 
 public class Employee {
-    Map<Integer,Integer> rewards = new HashMap<Integer, Integer>();
+    private Integer id;
+    private Integer Reward;
+    private Date updated;
 
-    public int incrementRewards(int employeeId){
-        int reward = 0;
-        if (rewards.containsKey(employeeId)) {
-            reward = rewards.get(employeeId);
-        }
+    public Employee() {
+    }
 
-        rewards.put(employeeId, ++reward);
-        return reward;
+    public Employee(Integer surveyorId) {
+        this.id = surveyorId;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public Integer getReward() {
+        return Reward;
+    }
+
+    public void setReward(Integer reward) {
+        Reward = reward;
+    }
+
+    public Date getUpdated() {
+        return updated;
+    }
+
+    public void setUpdated(Date updated) {
+        this.updated = updated;
     }
 }
