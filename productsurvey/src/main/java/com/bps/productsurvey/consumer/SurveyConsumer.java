@@ -1,5 +1,6 @@
 package com.bps.productsurvey.consumer;
 
+import com.bps.productsurvey.model.SurveyEvent;
 import com.bps.productsurvey.service.SurveyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,21 +18,13 @@ public class SurveyConsumer {
     @Autowired
     SurveyService surveyService;
 
-    @RabbitListener(queues = "surveys-created")
-    public void receive(String payload){
-        surveyService.calculateModus();
-    }
-
     @RabbitListener(bindings = @QueueBinding(
-            key = "survey-modus-key-1",
-            value=@Queue(
-                    value = "surveys-modus-1",
-                    durable = "false"
-            ),
-            exchange = @Exchange(value="survey-modus-exc",type = "fanout",durable = "true"),
+            value = @Queue(value = SurveyEvent.CreatedQueue, durable = "true"),
+            exchange = @Exchange(value=SurveyEvent.CreatedExchange,type = "fanout",durable = "true"),
+            key = SurveyEvent.CreatedRoutingKey,
             declare = "true"
     ))
-    public void receive2(String payload){
-        logger.debug("receive-2: " + payload);
+    public void receive(String payload){
+        surveyService.calculateModus();
     }
 }
